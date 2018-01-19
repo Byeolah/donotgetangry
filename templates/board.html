@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Chińczyk{% endblock %}
+
+{% block content %}
+
+<div id="tab">
+<table rules="none">
+{% set l = [0] %}
+        {% for j in range(0, 11) %}
+        <tr>
+            {% for i in range(0, 11) %}
+                {% set id = [j,loop.index0] %}
+                {#  <input type="button" >#}
+
+                {% if id in [[9, 0], [9, 1], [10, 0], [10, 1],[10,4]] or id in blueh %}
+                    <td class="blue">
+
+                {% elif id in redh or id in [[9, 9], [9, 10], [10, 9], [10, 10],[6,10]] %}
+                    <td class="red">
+
+                {% elif id in [[0, 9], [0, 10], [1, 9], [1, 10],[0,6]] or id in greenh %}
+                    <td class="green">
+
+                {% elif id in [[4,0],[0, 0], [0, 1], [1, 0], [1, 1]] or id in yellowh %}
+                    <td class="yellow">
+
+                {% elif id in field %}
+                    <td class="move">
+
+                {% else %}
+                    <td class="norm">
+                {% endif %}
+
+
+                {% for i in rpos %}
+                    {% if i == id %}
+                         {{ 'R' }}
+                        {{ l[0] }}
+                        {% if l.append(l.pop() + 1) %}{% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                {% for i in gpos %}
+                    {% if i == id %}
+                         {{ 'G' }}
+                    {% endif %}
+                {% endfor %}
+
+                {% for i in ypos %}
+                    {% if i == id %}
+                         {{ 'Y' }}
+                    {% endif %}
+                {% endfor %}
+
+                {% for i in bpos %}
+                    {% if i == id %}
+                         {{ 'B' }}
+                    {% endif %}
+                {% endfor %}
+
+            {% endfor %}
+        </tr>
+        {% endfor %}
+</table>
+</div>
+
+    <div class="choose_pawn">
+        <form action="game" method="POST">
+            {{ 'Wybierz pionek' }}<br>
+            <label>
+                <input type="radio" value="0" name="pawnnum"> {{ 0 }}<br>
+                <input type="radio" value="1" name="pawnnum"> {{ 1 }}<br>
+                <input type="radio" value="2" name="pawnnum"> {{ 2 }}<br>
+                <input type="radio" value="3" name="pawnnum"> {{ 3 }}<br>
+            </label>
+            <label>
+                <input type="radio" value="1" name="dir" checked> {{ 'ruch wprzód' }}<br>
+                <input type="radio" value="0" name="dir"> {{ 'ruch w tył' }}<br>
+            </label>
+            <input type="submit">
+        </form>
+    </div>
+    <div class="cube">
+        {{ 'Rzut kostką' }}<br>
+        <div class="title">
+            {{ cube }}
+         </div>
+        <form action="game" method="POST">
+            <input type="submit">
+        </form>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

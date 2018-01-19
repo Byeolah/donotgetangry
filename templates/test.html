@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Practice AJAX</title>
+    <script>
+    var request = new XMLHttpRequest();
+			request.open('POST', '/board/addserie', true);
+			request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+			request.send(JSON.stringify(titles));
+			request.addEventListener('load', function(e){
+				if(e.target.status == 200 && e.target.response == "OK"){
+					console.log("zgadza się")
+					console.log(e)
+					window.location.reload()
+				} else if (e.target.status == 200 && e.target.response == "NO") {
+					window.location.reload()
+					console.log("walidacja nie przeszła")
+				} else {
+					console.log("Houston, mamy problem")
+				}
+			})
+</script>
+  </head>
+  <body>
+
+  </body>
+</html>

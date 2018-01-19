@@ -1,0 +1,96 @@
+body {
+    margin-left: 10%;
+    margin-right: 10%;
+    }
+
+table{
+    margin-left: 15%;
+    margin-right: 2%;
+    margin-top: 5%;
+    border-style: solid;
+    border-color: black;
+    border-width: 2px;
+    float: left;
+
+}
+
+td {
+   text-align: center;
+    font-size: x-large;
+    font-weight: bolder;
+}
+
+td.norm{
+    height: 60px;
+    width: 60px;
+    background-color: #FFFFCC;
+}
+
+td.green{
+    background-color: #33CC00;
+    border: solid;
+    border-width: 2px;
+    width: 60px;
+}
+
+td.yellow{
+    background-color: yellow;
+    border: solid;
+    border-width: 2px;
+    height: 60px;
+    width: 60px;
+}
+
+td.red{
+    background-color: #FF0000;
+    border: solid;
+    border-width: 2px;
+    width: 60px;
+}
+
+td.blue{
+    background-color: #6633FF;
+    border: solid;
+    border-width: 2px;
+    height: 60px;
+}
+
+td.move{
+    background-color: #9C9CD5;
+    border: solid;
+    border-width: 2px;
+}
+
+.cube{
+    width: 200px;
+    height: 90px;
+    border-style: solid;
+    margin-right: 23%;
+    margin-top: 1%;
+    background-color: yellow;
+    float: right;
+    text-align: center;
+    padding-top: 10px
+}
+
+.title {
+    padding: 3%;
+    font-size: x-large;
+}
+
+.result{
+    font-size: x-large;
+    margin-top: 5%;
+}
+
+.choose_pawn {
+    width: 200px;
+    height: 200px;
+    border-style: solid;
+    margin-right: 23%;
+    margin-top: 18%;
+    background-color: greenyellow;
+    float: right;
+    text-align: center;
+    padding-top: 10px;
+}
