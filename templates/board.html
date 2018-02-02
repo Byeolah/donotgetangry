@@ -5,7 +5,10 @@
 
 <div id="tab">
 <table rules="none">
-{% set l = [0] %}
+{% set r = [0] %}
+{% set g = [0] %}
+{% set y = [0] %}
+{% set b = [0] %}
         {% for j in range(0, 11) %}
         <tr>
             {% for i in range(0, 11) %}
@@ -35,26 +38,32 @@
                 {% for i in rpos %}
                     {% if i == id %}
                          {{ 'R' }}
-                        {{ l[0] }}
-                        {% if l.append(l.pop() + 1) %}{% endif %}
+                        {{ r[0] }}
+                        {% if r.append(r.pop() + 1) %}{% endif %}
                     {% endif %}
                 {% endfor %}
 
                 {% for i in gpos %}
                     {% if i == id %}
                          {{ 'G' }}
+                        {{ g[0] }}
+                        {% if g.append(g.pop() + 1) %}{% endif %}
                     {% endif %}
                 {% endfor %}
 
                 {% for i in ypos %}
                     {% if i == id %}
                          {{ 'Y' }}
+                        {{ y[0] }}
+                        {% if y.append(y.pop() + 1) %}{% endif %}
                     {% endif %}
                 {% endfor %}
 
                 {% for i in bpos %}
                     {% if i == id %}
                          {{ 'B' }}
+                        {{ b[0] }}
+                        {% if b.append(b.pop() + 1) %}{% endif %}
                     {% endif %}
                 {% endfor %}
 
@@ -62,9 +71,19 @@
         </tr>
         {% endfor %}
 </table>
+
 </div>
+     <div class="color_turn">
+        {{ 'Teraz rusza się pionek ' }}<br>
+
+            {{ turn }}
+     <br>
+     {{ whatisay }}
+
+    </div>
 
     <div class="choose_pawn">
+        {% if changeclass == 0 %}
         <form action="game" method="POST">
             {{ 'Wybierz pionek' }}<br>
             <label>
@@ -79,15 +98,22 @@
             </label>
             <input type="submit">
         </form>
+    {% else %}
+    {{ 'Już zrobiłeś ruch' }}
+    {% endif %}
     </div>
     <div class="cube">
         {{ 'Rzut kostką' }}<br>
         <div class="title">
             {{ cube }}
          </div>
+        {% if changeclass == 1 %}
         <form action="game" method="POST">
             <input type="submit">
         </form>
+        {% else %}
+            {{ 'Nie ma oszukiwania' }}
+        {% endif %}
     </div>
 
 {% endblock %}

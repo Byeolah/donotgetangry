@@ -104,16 +104,29 @@ class board:
 
 class pawn(board):
 
-#wybó ruchu
-    def check_move(self, cube, pawnlist, homelist, field, pawn_number):
-        if field in homelist:
+#który kolor bazy
+    def whoiam(self, col):
+        return {
+        'red': [6,10],
+        'blue': [10,4],
+        'yellow': [4,0],
+        'green': [0,6]
+    }[col]
+
+#wybór ruchu
+    def check_move(self, cube, pawnlist, homelist, field, pawn_number, col):
+        moveresult = ''
+        if field in homelist: #wychodzi z bazy
             if cube == 6:
-                pawnlist[0] = [6,10]
+                x = self.whoiam(col)
+                pawnlist[pawn_number] = x
+                moveresult = 'Dobry ruch :)'
             else:
-                print(34)
-        else:
+                moveresult = 'Nie możesz wykonać tego ruchu!'
+        else: #jeśli pionek którym gracz chce się ruszyć nie jest w bazie
             new = self.move_forward(field, cube)
-            pawnlist[0] = new
+            pawnlist[pawn_number] = new
+        pawnlist.append(moveresult)
         return pawnlist
 
 #ruch do przodu
@@ -132,7 +145,7 @@ class pawn(board):
 
 #sprawdź bicie do tyłu
 
-
+#poprawić wyświetlanie jaki pionek się rusza
 
 #porównuje listy
     def compare(self, list1, list2):
@@ -170,6 +183,7 @@ ypos = yellow
 bpawn = pawn()
 bpos = blue
 
+
 positions = []
 positions.append(rpos)
 positions.append(bpos)
@@ -177,16 +191,23 @@ positions.append(ypos)
 positions.append(gpos)
 positions.append('red')
 positions.append(0)
+positions.append(0)
 
 marshal.dump(positions, open("data.marshal", "wb"))
-print(fields)
+
+@app.route('/',)
+def start():
+    return render_template('start.html')
 
 @app.route('/game', methods=['GET', 'POST'])
 def draw_board():
+    whatisay = ''
     form_len = request.form
 
     red = b.set_red()
     blue = b.set_blue()
+    yellow = b.set_yellow()
+    green = b.set_green()
     blueh = b.blue_house()
     redh = b.red_house()
     yellowh = b.yellow_house()
@@ -199,21 +220,49 @@ def draw_board():
     gpos = p[3]
     col = p[4]
     cube = p[5]
+    changeclass=p[6]
+
+    turn = col
 
     if len(form_len) == 2:
         pawn_number = int(request.form['pawnnum'])
 
         if col == 'red':
-            rpos = rpawn.check_move(cube, rpos, red, rpos[pawn_number], pawn_number)
+            rpos = rpawn.check_move(cube, rpos, red, rpos[pawn_number], pawn_number, col)
+            whatisay = rpos[4]
+            rpos.pop()
             red = b.set_red()
             col = 'blue'
+
         elif col == 'blue':
-            bpos = bpawn.check_move(cube, bpos, blue, [10,4])
+            bpos = bpawn.check_move(cube, bpos, blue, bpos[pawn_number], pawn_number, col)
+            whatisay = bpos[4]
+            bpos.pop()
             blue = b.set_blue()
+            col = 'yellow'
+
+        elif col == 'yellow':
+            ypos = ypawn.check_move(cube, ypos, yellow, ypos[pawn_number], pawn_number, col)
+            whatisay = ypos[4]
+            ypos.pop()
+            yellow = b.set_yellow()
+            col = 'green'
+
+        else:
+            gpos = bpawn.check_move(cube, gpos, green, gpos[pawn_number], pawn_number, col)
+            whatisay = gpos[4]
+            gpos.pop()
+            green = b.set_green()
             col = 'red'
+
     else:
         cube = b.cube()
 
+#zamiana - możliwy rzut albo ruch
+    if changeclass == 1: changeclass = 0
+    else: changeclass = 1
+
+    print(bpos)
     positions = []
     positions.append(rpos)
     positions.append(bpos)
@@ -221,11 +270,12 @@ def draw_board():
     positions.append(gpos)
     positions.append(col)
     positions.append(cube)
+    positions.append(changeclass)
 
     marshal.dump(positions, open("data.marshal", "wb"))
 
     return render_template('board.html', field=fields, blueh=blueh, redh=redh, yellowh=yellowh, greenh=greenh, cube=cube,
-                           rpos=rpos, gpos=gpos, ypos=ypos, bpos=bpos) #na sztywno id?
+                           rpos=rpos, gpos=gpos, ypos=ypos, bpos=bpos, turn = turn, changeclass=changeclass, whatisay = whatisay) #na sztywno id?
 
 if __name__ == '__main__':
     app.run(debug=True)
@@ -234,3 +284,4 @@ if __name__ == '__main__':
 
 
     #zaczyna gracz który pierwszy wyrzuci 6
+#ese est percipi - istnieć to być potrzeganym !!!!!!!

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Zacznij grę{% endblock %}
+{% block content %}
+<h3>Zacznij grę</h3>
+<div class="row">
+    <div class="col s10 offset-s1">
+        <form action="game" method="POST">
+            <div>
+                <span>Ilu ludzkich graczy będzie grac?</span>
+                    <select name = "humanplayers">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+            </div>
+            <input type="submit">
+        </form>
+    </div>
+</div>
+{% endblock %}
+
