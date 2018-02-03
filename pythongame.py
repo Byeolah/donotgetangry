@@ -1,9 +1,7 @@
 from flask import Flask
-from flask import render_template, json, request
+from flask import render_template, request
 from random import randint
-import os
 import marshal
-
 
 app = Flask(__name__)
 
@@ -29,7 +27,7 @@ class board:
             fieldlist.append([10,i])
         for i in range(9,5,-1):
             fieldlist.append([i, 4])
-        for i in range(3,-1,-1):
+        for i in range(3,0,-1):
             fieldlist.append([6,i])
         for i in range(6,3,-1):
             fieldlist.append([i, 0])
@@ -102,6 +100,7 @@ class board:
         return green_list
 
 
+#klasa gracza
 class pawn(board):
 
 #który kolor bazy
@@ -118,7 +117,8 @@ class pawn(board):
 #pionek któy zbija - osobna funkcja na to chyba; sprawdza 4 przypadki, jak któryś pyknie, to zmienia jego status na baze
 #ile etapów bicia?
 #na pewno funkcja do sprawdzania, czy jak się ruszy to po ruchu pole jest zajęte - w jednej w tył i w przód może? z parametrem gdzie ma sprawdzać +/-
-    def check_move(self, cube, pawnlist, homelist, field, pawn_number, col):
+
+    def check_move(self, cube, pawnlist, homelist, field, pawn_number, col, dealer, pos1, pos2, pos3, pos4):
         moveresult = ''
         if field in homelist: #wychodzi z bazy
             if cube == 6:
@@ -127,13 +127,16 @@ class pawn(board):
                 moveresult = 'Dobry ruch :)'
             else:
                 moveresult = 'Nie możesz wykonać tego ruchu!'
-        else: #jeśli pionek którym gracz chce się ruszyć nie jest w bazie
-            new = self.move_forward(field, cube)
+        elif dealer == 'forwards': #jeśli pionek którym gracz chce się ruszyć nie jest w bazie
+            new = self.move_forward(field, cube) #współrzędne pola, na które chce przejść
+            self.forwards(new, pos1, pos2, pos3, pos4, col)
             pawnlist[pawn_number] = new
+        else:
+            print('czekam na swoją kolej')
         pawnlist.append(moveresult)
         return pawnlist
 
-#ruch do przodu
+#pole do przodu
     def move_forward(self, field, cube):
         makelist = self.makelist()
         index = makelist.index(field)
@@ -142,11 +145,69 @@ class pawn(board):
             index = index - 40
         return makelist[index]
 
-#wystaw pionek z bazy
+#fuch do przodu bicie
+    def forwards(self, new, rpos, bpos, ypos, gpos, col):
 
-#sprawdź ruch do przodu
+        if new in rpos:
+            if col == 'red':
+                moveresult = 'Wybierz inny pionek' #tu do zrobienia
+            else:
+                iwilldie = rpos.index(new) #z pozycji numer pozycji
+                base = self.set_red()
+                for x in base:
+                    if x not in rpos:
+                       gotit = x #wolne pole w bazie
+                rpos[iwilldie] = gotit
+        elif new in bpos:
+            if col == 'blue':
+                moveresult = 'Wybierz inny pionek' #tu do zrobienia
+            else:
+                iwilldie = bpos.index(new) #z pozycji numer pozycji
+                base = self.set_blue()
+                for x in base:
+                    if x not in bpos:
+                       gotit = x #wolne pole w bazie
+                bpos[iwilldie] = gotit
+        elif new in ypos:
+            if col == 'yellow':
+                moveresult = 'Wybierz inny pionek' #tu do zrobienia
+            else:
+                iwilldie = ypos.index(new) #z pozycji numer pozycji
+                base = self.set_yellow()
+                for x in base:
+                    if x not in ypos:
+                       gotit = x #wolne pole w bazie
+                ypos[iwilldie] = gotit
+        elif new in gpos:
+            if col == 'green':
+                moveresult = 'Wybierz inny pionek' #tu do zrobienia
+            else:
+                iwilldie = gpos.index(new) #z pozycji numer pozycji
+                base = self.set_green()
+                for x in base:
+                    if x not in gpos:
+                       gotit = x #wolne pole w bazie
+                gpos[iwilldie] = gotit
+        else:
+            print('bongo')
 
-#zbij pionek przeciwnika
+
+#czy pole jest zajęte
+    #def available(self):
+
+#wystaw pionek z bazy - może się zrobi coby ładnie działało razem
+    def startit(self, field, homelist, col, pawnlist, pawn_number):
+        if field in homelist and cube == 6:  # wychodzi z bazy
+            x = self.whoiam(col)
+            pawnlist[pawn_number] = x
+            return True, pawnlist
+        else:
+            return False, pawnlist
+
+
+#sprawdź ruch do przodu - komputer
+
+#zbij pionek przeciwnika - wszyscy
 
 #sprawdź bicie do tyłu
 
@@ -165,36 +226,31 @@ class pawn(board):
 
 b = board()
 fields = b.makelist()
+print(fields)
 
+#tutaj zaczynają
 yellow = b.set_yellow()
 green = b.set_green()
 red = b.set_red()
 blue = b.set_blue()
-blueh = b.blue_house()
-redh = b.red_house()
-yellowh = b.yellow_house()
-greenh = b.green_house()
+
 cube = b.cube()
 
 rpawn = pawn()
 rpos = red
-
 gpawn = pawn()
 gpos = green
-
 ypawn = pawn()
 ypos = yellow
-
 bpawn = pawn()
 bpos = blue
-
 
 positions = []
 positions.append(rpos)
 positions.append(bpos)
 positions.append(ypos)
 positions.append(gpos)
-positions.append('red')
+positions.append('red') #kolor zaczynający tu
 positions.append(0)
 positions.append(0)
 
@@ -229,37 +285,30 @@ def draw_board():
 
     turn = col
 
-    if len(form_len) == 2:
+    if len(form_len) == 2: #jeśli przesłane którym pionkiem ruch i w którą stronę
         pawn_number = int(request.form['pawnnum'])
-
+        dealer = str(request.form['dir'])
         if col == 'red':
-            rpos = rpawn.check_move(cube, rpos, red, rpos[pawn_number], pawn_number, col)
+            rpos = rpawn.check_move(cube, rpos, red, rpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
+
             whatisay = rpos[4]
             rpos.pop()
-            red = b.set_red()
             col = 'blue'
-
         elif col == 'blue':
-            bpos = bpawn.check_move(cube, bpos, blue, bpos[pawn_number], pawn_number, col)
+            bpos = bpawn.check_move(cube, bpos, blue, bpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
             whatisay = bpos[4]
             bpos.pop()
-            blue = b.set_blue()
             col = 'yellow'
-
         elif col == 'yellow':
-            ypos = ypawn.check_move(cube, ypos, yellow, ypos[pawn_number], pawn_number, col)
+            ypos = ypawn.check_move(cube, ypos, yellow, ypos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
             whatisay = ypos[4]
             ypos.pop()
-            yellow = b.set_yellow()
             col = 'green'
-
         else:
-            gpos = bpawn.check_move(cube, gpos, green, gpos[pawn_number], pawn_number, col)
+            gpos = bpawn.check_move(cube, gpos, green, gpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
             whatisay = gpos[4]
             gpos.pop()
-            green = b.set_green()
             col = 'red'
-
     else:
         cube = b.cube()
 
@@ -268,18 +317,12 @@ def draw_board():
     else: changeclass = 1
 
     positions = []
-    positions.append(rpos)
-    positions.append(bpos)
-    positions.append(ypos)
-    positions.append(gpos)
-    positions.append(col)
-    positions.append(cube)
-    positions.append(changeclass)
+    positions.extend([rpos, bpos, ypos, gpos, col, cube, changeclass ])
 
     marshal.dump(positions, open("data.marshal", "wb"))
 
-    return render_template('board.html', field=fields, blueh=blueh, redh=redh, yellowh=yellowh, greenh=greenh, cube=cube,
-                           rpos=rpos, gpos=gpos, ypos=ypos, bpos=bpos, turn = turn, changeclass=changeclass, whatisay = whatisay) #na sztywno id?
+    return render_template('board.html', field=fields, cube=cube, rpos=rpos, gpos=gpos, ypos=ypos, bpos=bpos, turn = turn,
+                           changeclass=changeclass, whatisay = whatisay) #na sztywno id?
 
 if __name__ == '__main__':
     app.run(debug=True)

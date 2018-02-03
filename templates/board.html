@@ -15,16 +15,16 @@
                 {% set id = [j,loop.index0] %}
                 {#  <input type="button" >#}
 
-                {% if id in [[9, 0], [9, 1], [10, 0], [10, 1],[10,4]] or id in blueh %}
+                {% if id in [[9, 0], [9, 1], [10, 0], [10, 1],[10,4], [9, 5], [8, 5], [7, 5], [6, 5]] %}
                     <td class="blue">
 
-                {% elif id in redh or id in [[9, 9], [9, 10], [10, 9], [10, 10],[6,10]] %}
+                {% elif id in [[9, 9], [9, 10], [10, 9], [10, 10],[6,10], [5, 9], [5, 8], [5, 7], [5, 6]] %}
                     <td class="red">
 
-                {% elif id in [[0, 9], [0, 10], [1, 9], [1, 10],[0,6]] or id in greenh %}
+                {% elif id in [[0, 9], [0, 10], [1, 9], [1, 10],[0,6], [1, 5], [2, 5], [3, 5], [4, 5]] %}
                     <td class="green">
 
-                {% elif id in [[4,0],[0, 0], [0, 1], [1, 0], [1, 1]] or id in yellowh %}
+                {% elif id in [[4,0],[0, 0], [0, 1], [1, 0], [1, 1], [5, 1], [5, 2], [5, 3], [5, 4]] %}
                     <td class="yellow">
 
                 {% elif id in field %}
@@ -87,18 +87,22 @@
 
     <div class="choose_pawn">
         {% if changeclass == 0 %}
-        <form action="game" method="POST">
+        <form name="chosepawn" action="game" onsubmit="return validate()" method="POST">
             {{ 'Wybierz pionek' }}<br>
+            <div class="ss-item-required">
             <label>
-                <input type="radio" value="0" name="pawnnum" required> {{ 0 }}<br>
-                <input type="radio" value="1" name="pawnnum" required> {{ 1 }}<br>
-                <input type="radio" value="2" name="pawnnum" required> {{ 2 }}<br>
-                <input type="radio" value="3" name="pawnnum" required> {{ 3 }}<br>
+                <input type="radio" value="0" name="pawnnum"> {{ 0 }}<br>
+                <input type="radio" value="1" name="pawnnum"> {{ 1 }}<br>
+                <input type="radio" value="2" name="pawnnum"> {{ 2 }}<br>
+                <input type="radio" value="3" name="pawnnum"> {{ 3 }}<br>
             </label>
+            </div>
+            <div class="ss-item-required">
             <label>
-                <input type="radio" value="1" name="dir" checked> {{ 'ruch wprzód' }}<br>
-                <input type="radio" value="0" name="dir"> {{ 'ruch w tył' }}<br>
+                <input type="radio" value="forwards" name="dir" checked> {{ 'ruch wprzód' }}<br>
+                <input type="radio" value="backwards" name="dir"> {{ 'ruch w tył' }}<br>
             </label>
+            </div>
             <input type="submit">
         </form>
     {% else %}
@@ -122,5 +126,17 @@
 {% endblock %}
 
 {% block scripts %}
+    <script type="text/javascript">
+    function validate() {
+        if($('input[name=pawnnum]:checked').length<=0)
+        {
+         alert("Zaznacz wszystkie pola")
+            return false
+        }
+    }
 
+
+
+
+</script>
 {% endblock %}
