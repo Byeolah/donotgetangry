@@ -88,9 +88,22 @@ td.move{
     height: 200px;
     border-style: solid;
     margin-right: 23%;
-    margin-top: 18%;
+    margin-top: 1%;
     background-color: greenyellow;
     float: right;
     text-align: center;
     padding-top: 10px;
+}
+
+.color_turn {
+    width: 200px;
+    height: 100px;
+    border-style: solid;
+    margin-right: 23%;
+    margin-top: 8%;
+    background-color: pink;
+    float: right;
+    text-align: center;
+    padding-top: 10px;
+
 }

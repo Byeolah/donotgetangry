@@ -38,32 +38,31 @@
                 {% for i in rpos %}
                     {% if i == id %}
                          {{ 'R' }}
-                        {{ r[0] }}
-                        {% if r.append(r.pop() + 1) %}{% endif %}
+                        {{ loop.index0 }}
                     {% endif %}
                 {% endfor %}
 
                 {% for i in gpos %}
                     {% if i == id %}
                          {{ 'G' }}
-                        {{ g[0] }}
-                        {% if g.append(g.pop() + 1) %}{% endif %}
+
+                        {{ loop.index0 }}
                     {% endif %}
                 {% endfor %}
 
                 {% for i in ypos %}
                     {% if i == id %}
                          {{ 'Y' }}
-                        {{ y[0] }}
-                        {% if y.append(y.pop() + 1) %}{% endif %}
+
+                        {{ loop.index0 }}
                     {% endif %}
                 {% endfor %}
 
                 {% for i in bpos %}
                     {% if i == id %}
                          {{ 'B' }}
-                        {{ b[0] }}
-                        {% if b.append(b.pop() + 1) %}{% endif %}
+
+                        {{ loop.index0 }}
                     {% endif %}
                 {% endfor %}
 
@@ -78,7 +77,11 @@
 
             {{ turn }}
      <br>
-     {{ whatisay }}
+     {{ whatisay }} <br>
+     {% if changeclass == 1 %}
+            {{ 'Rzuca następny gracz' }}
+        {% endif %}
+
 
     </div>
 
@@ -87,10 +90,10 @@
         <form action="game" method="POST">
             {{ 'Wybierz pionek' }}<br>
             <label>
-                <input type="radio" value="0" name="pawnnum"> {{ 0 }}<br>
-                <input type="radio" value="1" name="pawnnum"> {{ 1 }}<br>
-                <input type="radio" value="2" name="pawnnum"> {{ 2 }}<br>
-                <input type="radio" value="3" name="pawnnum"> {{ 3 }}<br>
+                <input type="radio" value="0" name="pawnnum" required> {{ 0 }}<br>
+                <input type="radio" value="1" name="pawnnum" required> {{ 1 }}<br>
+                <input type="radio" value="2" name="pawnnum" required> {{ 2 }}<br>
+                <input type="radio" value="3" name="pawnnum" required> {{ 3 }}<br>
             </label>
             <label>
                 <input type="radio" value="1" name="dir" checked> {{ 'ruch wprzód' }}<br>

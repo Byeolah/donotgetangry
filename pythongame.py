@@ -113,7 +113,11 @@ class pawn(board):
         'green': [0,6]
     }[col]
 
-#wybór ruchu
+#sprawdzenie ruchu u człowieka
+#funkcja wywołująca funkcje; wchodzą jakieś dane, sprawdza się jakiś warunek, w zależności zwraca liczę, potem w zalezności od liczby wybiera co dalej
+#pionek któy zbija - osobna funkcja na to chyba; sprawdza 4 przypadki, jak któryś pyknie, to zmienia jego status na baze
+#ile etapów bicia?
+#na pewno funkcja do sprawdzania, czy jak się ruszy to po ruchu pole jest zajęte - w jednej w tył i w przód może? z parametrem gdzie ma sprawdzać +/-
     def check_move(self, cube, pawnlist, homelist, field, pawn_number, col):
         moveresult = ''
         if field in homelist: #wychodzi z bazy
@@ -134,10 +138,11 @@ class pawn(board):
         makelist = self.makelist()
         index = makelist.index(field)
         index = index + cube
+        if index > 39:
+            index = index - 40
         return makelist[index]
 
 #wystaw pionek z bazy
-
 
 #sprawdź ruch do przodu
 
@@ -145,7 +150,7 @@ class pawn(board):
 
 #sprawdź bicie do tyłu
 
-#poprawić wyświetlanie jaki pionek się rusza
+#niech się ogarnie jak nie wybierze pionka do ruchu
 
 #porównuje listy
     def compare(self, list1, list2):
@@ -262,7 +267,6 @@ def draw_board():
     if changeclass == 1: changeclass = 0
     else: changeclass = 1
 
-    print(bpos)
     positions = []
     positions.append(rpos)
     positions.append(bpos)
