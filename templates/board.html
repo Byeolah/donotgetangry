@@ -27,6 +27,12 @@
                 {% elif id in [[4,0],[0, 0], [0, 1], [1, 0], [1, 1], [5, 1], [5, 2], [5, 3], [5, 4]] %}
                     <td class="yellow">
 
+                {% elif id in [[4,6],[6,4]] %}
+                    <td class="trap">
+
+                {% elif id in [[4,4],[6,6]] %}
+                    <td class="untouch">
+
                 {% elif id in field %}
                     <td class="move">
 
@@ -94,7 +100,7 @@
                 <input type="radio" value="0" name="pawnnum"> {{ 0 }}<br>
                 <input type="radio" value="1" name="pawnnum"> {{ 1 }}<br>
                 <input type="radio" value="2" name="pawnnum"> {{ 2 }}<br>
-                <input type="radio" value="3" name="pawnnum"> {{ 3 }}<br>
+                <input type="radio" value="3" name="pawnnum" checked> {{ 3 }}<br>
             </label>
             </div>
             <div class="ss-item-required">

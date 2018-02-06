@@ -37,6 +37,11 @@ class board:
             fieldlist.append([i,4])
         for i in range(4, 6):
             fieldlist.append([0, i])
+        for i in range(1,5):
+            fieldlist.append([i,5])
+        fieldlist.insert(50,[5,9])
+        for i in range(8,4,-1):
+            fieldlist.append([5,i])
         return fieldlist
 
     def blue_house(self):
@@ -124,13 +129,15 @@ class pawn(board):
             if cube == 6:
                 x = self.whoiam(col)
                 pawnlist[pawn_number] = x
+                self.forwards(x, pos1, pos2, pos3, pos4, col, field)
                 moveresult = 'Dobry ruch :)'
             else:
                 moveresult = 'Nie możesz wykonać tego ruchu!'
         elif dealer == 'forwards': #jeśli pionek którym gracz chce się ruszyć nie jest w bazie
             new = self.move_forward(field, cube) #współrzędne pola, na które chce przejść
-            self.forwards(new, pos1, pos2, pos3, pos4, col)
-            pawnlist[pawn_number] = new
+            self.forwards(new, pos1, pos2, pos3, pos4, col, field)
+            if new not in ([6,4],[4,6]):
+                pawnlist[pawn_number] = new
         else:
             print('czekam na swoją kolej')
         pawnlist.append(moveresult)
@@ -146,11 +153,14 @@ class pawn(board):
         return makelist[index]
 
 #fuch do przodu bicie
-    def forwards(self, new, rpos, bpos, ypos, gpos, col):
-
-        if new in rpos:
+    def forwards(self, new, rpos, bpos, ypos, gpos, col, field):
+        fields = self.makelist()
+        trap = ([6,4],[4,6])
+        if new in trap:
+            self.trap(field, col, rpos, bpos, ypos, gpos)
+        elif new in rpos:
             if col == 'red':
-                moveresult = 'Wybierz inny pionek' #tu do zrobienia
+                moveresult = 'Wybierz inny pionek' #nie może zbić swojego pionka | tu do zrobienia
             else:
                 iwilldie = rpos.index(new) #z pozycji numer pozycji
                 base = self.set_red()
@@ -191,6 +201,37 @@ class pawn(board):
         else:
             print('bongo')
 
+#zbicie na polu trap
+    def trap(self, new, col, rpos, bpos, ypos, gpos):
+        if col == 'red':
+            iwilldie = rpos.index(new)
+            base = self.set_red()
+            for x in base:
+                if x not in rpos:
+                    gotit = x  # wolne pole w bazie
+                rpos[iwilldie] = gotit
+        elif col == 'blue':
+            iwilldie = bpos.index(new)  # z pozycji numer pozycji
+            base = self.set_blue()
+            for x in base:
+                if x not in bpos:
+                    gotit = x  # wolne pole w bazie
+            bpos[iwilldie] = gotit
+        elif col == 'yellow':
+            iwilldie = ypos.index(new)  # z pozycji numer pozycji
+            base = self.set_yellow()
+            for x in base:
+                if x not in ypos:
+                    gotit = x  # wolne pole w bazie
+            ypos[iwilldie] = gotit
+        else:
+            iwilldie = gpos.index(new)  # z pozycji numer pozycji
+            base = self.set_green()
+            for x in base:
+                if x not in gpos:
+                    gotit = x  # wolne pole w bazie
+            gpos[iwilldie] = gotit
+
 
 #czy pole jest zajęte
     #def available(self):
@@ -226,7 +267,7 @@ class pawn(board):
 
 b = board()
 fields = b.makelist()
-print(fields)
+#print(fields[51])
 
 #tutaj zaczynają
 yellow = b.set_yellow()

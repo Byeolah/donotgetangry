@@ -61,6 +61,18 @@ td.move{
     border-width: 2px;
 }
 
+td.trap{
+    background-color: #000000;
+    border: solid;
+    border-width: 2px;
+}
+
+td.untouch{
+    background-color: #FFA040;
+    border: solid;
+    border-width: 2px;
+}
+
 .cube{
     width: 200px;
     height: 90px;
