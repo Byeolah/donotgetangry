@@ -4,6 +4,17 @@
         <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
     </head>
 
+    <header>
+        <nav class="teal lighten-1">
+
+            <ul>
+                 <li><a href="{{url_for('start')}}">Nowa gra</a></li>
+                <li><a href="{{url_for('draw_board')}}">O grze</a></li>
+            </ul>
+        </nav>
+
+    </header>
+
     <body>
         {% block content %}{% endblock %}
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
