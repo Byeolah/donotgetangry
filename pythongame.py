@@ -38,10 +38,13 @@ class board:
         for i in range(4, 6):
             fieldlist.append([0, i])
         for i in range(1,5):
-            fieldlist.append([i,5])
-        fieldlist.insert(50,[5,9])
-        for i in range(8,4,-1):
-            fieldlist.append([5,i])
+            fieldlist.append([i,5]) #40-43 zielone
+        for i in range(9,5,-1):
+            fieldlist.append([5,i])#44-47 czerwone
+        for i in range(9,5,-1):
+            fieldlist.append([i,5])#48-51 niebieskie
+        for i in range(1,5):
+            fieldlist.append([5,i])#52-55 żółte
         return fieldlist
 
     def blue_house(self):
@@ -120,18 +123,20 @@ class pawn(board):
 #sprawdzenie ruchu u człowieka
 #funkcja wywołująca funkcje; wchodzą jakieś dane, sprawdza się jakiś warunek, w zależności zwraca liczę, potem w zalezności od liczby wybiera co dalej
 
-    def check_move(self, cube, pawnlist, homelist, field, pawn_number, col, dealer, pos1, pos2, pos3, pos4):
+    def check_move(self, cube, pawnlist, homelist, field, pawn_number, col, dealer, pos1, pos2, pos3, pos4): #field - stara pozycja
         beg = ''
         if field in homelist: #wychodzi z bazy
             if cube == 6:
                 x = self.whoiam(col)
-                beg = self.forwards(x, pos1, pos2, pos3, pos4, col, field)
+                beg = self.forwards(x, pos1, pos2, pos3, pos4, col, field, cube)
                 if beg != 'Na tym polu już stoi twój pionek':
                     pawnlist[pawn_number] = x
         elif dealer == 'forwards': #jeśli pionek którym gracz chce się ruszyć nie jest w bazie i ruch do przodu
             new = self.move_forward(field, cube) #współrzędne pola, na które chce przejść
-            beg = self.forwards(new, pos1, pos2, pos3, pos4, col, field)
-            if beg == 1 or beg != 'sinu':
+            beg = self.forwards(new, pos1, pos2, pos3, pos4, col, field, cube)
+            if type(beg) == list:
+                pawnlist = beg
+            elif beg == 1 or beg != 'sinu':
                 pawnlist[pawn_number] = new
         else: #jeśli gracz chce się ruszyć do tyłu
             new = self.move_backward(field, cube)  # współrzędne pola, na które chce przejść
@@ -142,6 +147,7 @@ class pawn(board):
             pawnlist.append(beg)
         else:
             pawnlist.append('')
+        print(pawnlist)
         return pawnlist
 
 #pole do przodu
@@ -161,6 +167,23 @@ class pawn(board):
         if index < 0:
             index = 40 + index
         return makelist[index]
+
+#ruch w domu
+    def move_inhouse(self, homelist, cube, field): #pole przed ruchem jest w domu | field to index
+        if field + cube < (homelist[1]+1): #ruch jak nie wychodzi poza dom
+            field = field + cube #index po ruchu
+            return field
+
+    def tellmepos(self, col, rpos, bpos, ypos, gpos):
+        if col == 'red':
+            return rpos
+        elif col == 'blue':
+            return bpos
+        elif col == 'yellow':
+            return ypos
+        else:
+            return gpos
+
 
 #bicie do tyłu
     def backwards(self, new, rpos, bpos, ypos, gpos, col, field):
@@ -213,71 +236,96 @@ class pawn(board):
 
         return moveresult
 
+#wejście do domu
+    def gohome(self, field_before, cube, col, pos):
+        fields = self.makelist() #lista wszystkich pól
+        if field_before in fields:
+            index = fields.index(field_before) #indeks pola na którym stoi pionek przed ruchem
+            posplace = pos.index(field_before) #index tegoż pola w liście pos
+            if col == 'red':
+                if index < 10 and index + cube > 9: #ma wejść do domu
+                    home = self.red_house()
+                elif field_before in ([5,9],[5,8],[5,7]): #jest już w domu
+                    print('wchodze w elif')
+                    next_index = self.move_inhouse([44,47], cube, index)
+                    new = fields[next_index]
+                    pos[posplace] = new
+                    return pos
+                elif index == 47:
+                    print('Ten pionek jest już w domu')
+                else:
+                    return 0
+        else:
+            return 0
 #ruch do przodu + bicie
-    def forwards(self, new, rpos, bpos, ypos, gpos, col, field):
-        fields = self.makelist()
+    def forwards(self, new, rpos, bpos, ypos, gpos, col, field, cube): #field - współrzędne przed ruchem
         trap = ([6,4],[4,6])
         untouch = ([4,4],[6,6])
-        if new in trap: #zbity jak wejdzie na trap
-            moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
-        elif new in rpos: #bicie przez kolejne 4 elify
-            if col == 'red':
-                moveresult = 'Na tym polu już stoi twój pionek' #nie może zbić swojego pionka | tu do zrobienia
-            else:
-                if new in untouch:
-                    moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
+        pos = list(self.tellmepos(col, rpos,bpos,ypos,gpos))
+        amihome = self.gohome(field, cube, col, pos)
+        if amihome == 0: #jeśli pionek nie ma nic wspólnego z domem
+            if new in trap: #zbity jak wejdzie na trap
+                moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
+            elif new in rpos: #bicie przez kolejne 4 elify
+                if col == 'red':
+                    moveresult = 'Na tym polu już stoi twój pionek' #nie może zbić swojego pionka | tu do zrobienia
                 else:
-                    iwilldie = rpos.index(new) #z pozycji numer pozycji
-                    base = self.set_red()
-                    for x in base:
-                        if x not in rpos:
-                           gotit = x #wolne pole w bazie
-                    rpos[iwilldie] = gotit
-                    moveresult = 1
-        elif new in bpos:
-            if col == 'blue':
-                moveresult = 'Na tym polu już stoi twój pionek' #tu do zrobienia
-            else:
-                if new in untouch:
-                    moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
+                    if new in untouch:
+                        moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
+                    else:
+                        iwilldie = rpos.index(new) #z pozycji numer pozycji
+                        base = self.set_red()
+                        for x in base:
+                            if x not in rpos:
+                               gotit = x #wolne pole w bazie
+                        rpos[iwilldie] = gotit
+                        moveresult = 1
+            elif new in bpos:
+                if col == 'blue':
+                    moveresult = 'Na tym polu już stoi twój pionek' #tu do zrobienia
                 else:
-                    iwilldie = bpos.index(new) #z pozycji numer pozycji
-                    base = self.set_blue()
-                    for x in base:
-                        if x not in bpos:
-                           gotit = x #wolne pole w bazie
-                    bpos[iwilldie] = gotit
-                    moveresult = 1
-        elif new in ypos:
-            if col == 'yellow':
-                moveresult = 'Na tym polu już stoi twój pionek' #tu do zrobienia
-            else:
-                if new in untouch:
-                    moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
+                    if new in untouch:
+                        moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
+                    else:
+                        iwilldie = bpos.index(new) #z pozycji numer pozycji
+                        base = self.set_blue()
+                        for x in base:
+                            if x not in bpos:
+                               gotit = x #wolne pole w bazie
+                        bpos[iwilldie] = gotit
+                        moveresult = 1
+            elif new in ypos:
+                if col == 'yellow':
+                    moveresult = 'Na tym polu już stoi twój pionek' #tu do zrobienia
                 else:
-                    iwilldie = ypos.index(new) #z pozycji numer pozycji
-                    base = self.set_yellow()
-                    for x in base:
-                        if x not in ypos:
-                           gotit = x #wolne pole w bazie
-                    ypos[iwilldie] = gotit
-                    moveresult = 1
-        elif new in gpos:
-            if col == 'green':
-                moveresult = 'Na tym polu już stoi twój pionek' #tu do zrobienia
-            else:
-                if new in untouch:
-                    moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
+                    if new in untouch:
+                        moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
+                    else:
+                        iwilldie = ypos.index(new) #z pozycji numer pozycji
+                        base = self.set_yellow()
+                        for x in base:
+                            if x not in ypos:
+                               gotit = x #wolne pole w bazie
+                        ypos[iwilldie] = gotit
+                        moveresult = 1
+            elif new in gpos:
+                if col == 'green':
+                    moveresult = 'Na tym polu już stoi twój pionek' #tu do zrobienia
                 else:
-                    iwilldie = gpos.index(new) #z pozycji numer pozycji
-                    base = self.set_green()
-                    for x in base:
-                        if x not in gpos:
-                           gotit = x #wolne pole w bazie
-                    gpos[iwilldie] = gotit
-                    moveresult = 1
-        else: #ruch do przodu/wejście do domu
-            moveresult = ''
+                    if new in untouch:
+                        moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
+                    else:
+                        iwilldie = gpos.index(new) #z pozycji numer pozycji
+                        base = self.set_green()
+                        for x in base:
+                            if x not in gpos:
+                               gotit = x #wolne pole w bazie
+                        gpos[iwilldie] = gotit
+                        moveresult = 1
+            else: #ruch do przodu/wejście do domu
+                moveresult = ''
+        else:
+            moveresult = amihome
 
         return moveresult
 
@@ -331,7 +379,6 @@ class pawn(board):
 
 b = board()
 fields = b.makelist()
-#print(fields[51])
 
 #tutaj zaczynają
 yellow = b.set_yellow()
@@ -352,7 +399,7 @@ bpos = blue
 
 #dodać to do losowania
 positions = []
-positions.append(rpos)
+positions.append([[5,9],[9,9],[9,10],[10,9]])
 positions.append(bpos)
 positions.append(ypos)
 positions.append(gpos)
