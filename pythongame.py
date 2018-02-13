@@ -136,18 +136,22 @@ class pawn(board):
             beg = self.forwards(new, pos1, pos2, pos3, pos4, col, field, cube)
             if type(beg) == list:
                 pawnlist = beg
-            elif beg == 1 or beg != 'sinu':
+            elif beg == 1 or beg not in ('sinu','Nie możesz wykonać tego ruchu', 'Ten pionek jest już w domu'):
                 pawnlist[pawn_number] = new
         else: #jeśli gracz chce się ruszyć do tyłu
-            new = self.move_backward(field, cube)  # współrzędne pola, na które chce przejść
-            beg = self.backwards(new, pos1, pos2, pos3, pos4, col, field)
-            if beg == 1:
-                pawnlist[pawn_number] = new
+            fieldlist = self.makelist()
+            temp = fieldlist.index(field)
+            if temp > 39:
+                beg = 'Nie możesz wykonać tego ruchu'
+            else:
+                new = self.move_backward(field, cube)  # współrzędne pola, na które chce przejść
+                beg = self.backwards(new, pos1, pos2, pos3, pos4, col, field)
+                if beg == 1:
+                    pawnlist[pawn_number] = new
         if type(beg) == str:
             pawnlist.append(beg)
         else:
             pawnlist.append('')
-        print(pawnlist)
         return pawnlist
 
 #pole do przodu
@@ -173,7 +177,10 @@ class pawn(board):
         if field + cube < (homelist[1]+1): #ruch jak nie wychodzi poza dom
             field = field + cube #index po ruchu
             return field
+        else:
+            return 'Nie możesz wykonać tego ruchu'
 
+#wybierz pozycje przypisane do koloru
     def tellmepos(self, col, rpos, bpos, ypos, gpos):
         if col == 'red':
             return rpos
@@ -184,6 +191,8 @@ class pawn(board):
         else:
             return gpos
 
+
+#bicie do tyłu
 
 #bicie do tyłu
     def backwards(self, new, rpos, bpos, ypos, gpos, col, field):
@@ -242,21 +251,92 @@ class pawn(board):
         if field_before in fields:
             index = fields.index(field_before) #indeks pola na którym stoi pionek przed ruchem
             posplace = pos.index(field_before) #index tegoż pola w liście pos
+            new_index = index + cube
             if col == 'red':
-                if index < 10 and index + cube > 9: #ma wejść do domu
-                    home = self.red_house()
-                elif field_before in ([5,9],[5,8],[5,7]): #jest już w domu
+                if index < 10 and new_index > 9: #ma wejść do domu
+                    moveh = new_index - 9 #o ile się ruszyć w domu
+                    if moveh < 5:
+                        moveh = moveh -1
+                        next_index = self.move_inhouse([44, 47], moveh, 44)  # index po ruchu
+                        return self.check_ingohome(next_index, fields, pos, posplace)
+                    else:
+                        return 'Nie możesz wykonać tego ruchu'
+                elif index in range(44,47): #jest już w domu
                     print('wchodze w elif')
-                    next_index = self.move_inhouse([44,47], cube, index)
-                    new = fields[next_index]
-                    pos[posplace] = new
-                    return pos
+                    next_index = self.move_inhouse([44,47], cube, index) #index po ruchu
+                    return self.check_ingohome(next_index, fields, pos, posplace)
                 elif index == 47:
-                    print('Ten pionek jest już w domu')
+                    return 'Ten pionek jest już w domu'
+                else:
+                    return 0
+            elif col == 'blue':
+                if index < 20 and new_index > 19: #ma wejść do domu
+                    moveh = new_index - 19 #o ile się ruszyć w domu
+                    if moveh < 5:
+                        moveh = moveh -1
+                        next_index = self.move_inhouse([48, 51], moveh, 48)  # index po ruchu
+                        return self.check_ingohome(next_index, fields, pos, posplace)
+                    else:
+                        return 'Nie możesz wykonać tego ruchu'
+                elif index in range(48,51): #jest już w domu
+                    print('wchodze w elif')
+                    next_index = self.move_inhouse([48,51], cube, index) #index po ruchu
+                    return self.check_ingohome(next_index, fields, pos, posplace)
+                elif index == 51:
+                    return 'Ten pionek jest już w domu'
+                else:
+                    return 0
+            elif col == 'yellow':
+                if index < 30 and new_index > 29: #ma wejść do domu
+                    moveh = new_index - 29 #o ile się ruszyć w domu
+                    if moveh < 5:
+                        moveh = moveh -1
+                        next_index = self.move_inhouse([52, 55], moveh, 52)  # index po ruchu
+                        return self.check_ingohome(next_index, fields, pos, posplace)
+                    else:
+                        return 'Nie możesz wykonać tego ruchu'
+                elif index in range(52,55): #jest już w domu
+                    print('wchodze w elif')
+                    next_index = self.move_inhouse([52,55], cube, index) #index po ruchu
+                    return self.check_ingohome(next_index, fields, pos, posplace)
+                elif index == 55:
+                    return 'Ten pionek jest już w domu'
+                else:
+                    return 0
+            elif col == 'green':
+                if index < 40 and new_index > 39: #ma wejść do domu
+                    moveh = new_index - 39 #o ile się ruszyć w domu
+                    if moveh < 5:
+                        moveh = moveh -1
+                        next_index = self.move_inhouse([40,43], moveh, 40)  # index po ruchu
+                        return self.check_ingohome(next_index, fields, pos, posplace)
+                    else:
+                        return 'Nie możesz wykonać tego ruchu'
+                elif index in range(40,43): #jest już w domu
+                    print('wchodze w elif')
+                    next_index = self.move_inhouse([40,43], cube, index) #index po ruchu
+                    return self.check_ingohome(next_index, fields, pos, posplace)
+                elif index == 43:
+                    return 'Ten pionek jest już w domu'
                 else:
                     return 0
         else:
             return 0
+
+#elif w gohome
+
+#sprawdzenie w funkcji gohome
+    def check_ingohome(self, next_index, fields, pos, posplace):
+        if type(next_index) != str:
+            new = fields[next_index] #współrzędne po ruchu
+            if new in pos:
+                return 'Nie możesz wykonać tego ruchu'
+            else:
+                pos[posplace] = new
+                return pos
+        else:
+            return next_index
+
 #ruch do przodu + bicie
     def forwards(self, new, rpos, bpos, ypos, gpos, col, field, cube): #field - współrzędne przed ruchem
         trap = ([6,4],[4,6])
@@ -265,6 +345,7 @@ class pawn(board):
         amihome = self.gohome(field, cube, col, pos)
         if amihome == 0: #jeśli pionek nie ma nic wspólnego z domem
             if new in trap: #zbity jak wejdzie na trap
+                print('jestem w trap')
                 moveresult = self.trap(field, col, rpos, bpos, ypos, gpos)
             elif new in rpos: #bicie przez kolejne 4 elify
                 if col == 'red':
@@ -399,7 +480,7 @@ bpos = blue
 
 #dodać to do losowania
 positions = []
-positions.append([[5,9],[9,9],[9,10],[10,9]])
+positions.append(rpos)
 positions.append(bpos)
 positions.append(ypos)
 positions.append(gpos)
