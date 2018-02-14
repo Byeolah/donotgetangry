@@ -6,7 +6,6 @@ import marshal
 app = Flask(__name__)
 
 class board:
-
     def __init__(self):
         k = 1
 
@@ -121,28 +120,27 @@ class pawn(board):
     }[col]
 
 #sprawdzenie ruchu u człowieka
-#funkcja wywołująca funkcje; wchodzą jakieś dane, sprawdza się jakiś warunek, w zależności zwraca liczę, potem w zalezności od liczby wybiera co dalej
-
     def check_move(self, cube, pawnlist, homelist, field, pawn_number, col, dealer, pos1, pos2, pos3, pos4): #field - stara pozycja
-        beg = ''
         if field in homelist: #wychodzi z bazy
             if cube == 6:
                 x = self.whoiam(col)
                 beg = self.forwards(x, pos1, pos2, pos3, pos4, col, field, cube)
                 if beg != 'Na tym polu już stoi twój pionek':
                     pawnlist[pawn_number] = x
+            else:
+                beg = 'Nie możesz wykonać tego ruchu!'
         elif dealer == 'forwards': #jeśli pionek którym gracz chce się ruszyć nie jest w bazie i ruch do przodu
             new = self.move_forward(field, cube) #współrzędne pola, na które chce przejść
             beg = self.forwards(new, pos1, pos2, pos3, pos4, col, field, cube)
             if type(beg) == list:
                 pawnlist = beg
-            elif beg == 1 or beg not in ('sinu','Nie możesz wykonać tego ruchu', 'Ten pionek jest już w domu'):
+            elif beg == 1 or beg not in ('sinu','Nie możesz wykonać tego ruchu!', 'Ten pionek jest już w domu'):
                 pawnlist[pawn_number] = new
         else: #jeśli gracz chce się ruszyć do tyłu
             fieldlist = self.makelist()
             temp = fieldlist.index(field)
             if temp > 39:
-                beg = 'Nie możesz wykonać tego ruchu'
+                beg = 'Nie możesz wykonać tego ruchu!'
             else:
                 new = self.move_backward(field, cube)  # współrzędne pola, na które chce przejść
                 beg = self.backwards(new, pos1, pos2, pos3, pos4, col, field)
@@ -172,172 +170,7 @@ class pawn(board):
             index = 40 + index
         return makelist[index]
 
-#ruch w domu
-    def move_inhouse(self, homelist, cube, field): #pole przed ruchem jest w domu | field to index
-        if field + cube < (homelist[1]+1): #ruch jak nie wychodzi poza dom
-            field = field + cube #index po ruchu
-            return field
-        else:
-            return 'Nie możesz wykonać tego ruchu'
-
-#wybierz pozycje przypisane do koloru
-    def tellmepos(self, col, rpos, bpos, ypos, gpos):
-        if col == 'red':
-            return rpos
-        elif col == 'blue':
-            return bpos
-        elif col == 'yellow':
-            return ypos
-        else:
-            return gpos
-
-
-#bicie do tyłu
-
-#bicie do tyłu
-    def backwards(self, new, rpos, bpos, ypos, gpos, col, field):
-        if new in rpos: #bicie przez kolejne 4 elify
-            if col == 'red':
-                moveresult = 'Nie możesz wykonać tego ruchu!' #nie może zbić swojego pionka | tu do zrobienia
-            else:
-                iwilldie = rpos.index(new) #z pozycji numer pozycji
-                base = self.set_red()
-                for x in base:
-                    if x not in rpos:
-                       gotit = x #wolne pole w bazie
-                rpos[iwilldie] = gotit
-                moveresult = 1
-        elif new in bpos:
-            if col == 'blue':
-                moveresult = 'Nie możesz wykonać tego ruchu!' #tu do zrobienia
-            else:
-                iwilldie = bpos.index(new) #z pozycji numer pozycji
-                base = self.set_blue()
-                for x in base:
-                    if x not in bpos:
-                       gotit = x #wolne pole w bazie
-                bpos[iwilldie] = gotit
-                moveresult = 1
-        elif new in ypos:
-            if col == 'yellow':
-                moveresult = 'Nie możesz wykonać tego ruchu!' #tu do zrobienia
-            else:
-                iwilldie = ypos.index(new) #z pozycji numer pozycji
-                base = self.set_yellow()
-                for x in base:
-                    if x not in ypos:
-                       gotit = x #wolne pole w bazie
-                ypos[iwilldie] = gotit
-                moveresult = 1
-        elif new in gpos:
-            if col == 'green':
-                moveresult = 'Nie możesz wykonać tego ruchu!' #tu do zrobienia
-            else:
-                iwilldie = gpos.index(new) #z pozycji numer pozycji
-                base = self.set_green()
-                for x in base:
-                    if x not in gpos:
-                       gotit = x #wolne pole w bazie
-                gpos[iwilldie] = gotit
-                moveresult = 1
-        else:
-            moveresult = 'Nie możesz wykonać tego ruchu!'
-
-        return moveresult
-
-#wejście do domu
-    def gohome(self, field_before, cube, col, pos):
-        fields = self.makelist() #lista wszystkich pól
-        if field_before in fields:
-            index = fields.index(field_before) #indeks pola na którym stoi pionek przed ruchem
-            posplace = pos.index(field_before) #index tegoż pola w liście pos
-            new_index = index + cube
-            if col == 'red':
-                if index < 10 and new_index > 9: #ma wejść do domu
-                    moveh = new_index - 9 #o ile się ruszyć w domu
-                    if moveh < 5:
-                        moveh = moveh -1
-                        next_index = self.move_inhouse([44, 47], moveh, 44)  # index po ruchu
-                        return self.check_ingohome(next_index, fields, pos, posplace)
-                    else:
-                        return 'Nie możesz wykonać tego ruchu'
-                elif index in range(44,47): #jest już w domu
-                    print('wchodze w elif')
-                    next_index = self.move_inhouse([44,47], cube, index) #index po ruchu
-                    return self.check_ingohome(next_index, fields, pos, posplace)
-                elif index == 47:
-                    return 'Ten pionek jest już w domu'
-                else:
-                    return 0
-            elif col == 'blue':
-                if index < 20 and new_index > 19: #ma wejść do domu
-                    moveh = new_index - 19 #o ile się ruszyć w domu
-                    if moveh < 5:
-                        moveh = moveh -1
-                        next_index = self.move_inhouse([48, 51], moveh, 48)  # index po ruchu
-                        return self.check_ingohome(next_index, fields, pos, posplace)
-                    else:
-                        return 'Nie możesz wykonać tego ruchu'
-                elif index in range(48,51): #jest już w domu
-                    print('wchodze w elif')
-                    next_index = self.move_inhouse([48,51], cube, index) #index po ruchu
-                    return self.check_ingohome(next_index, fields, pos, posplace)
-                elif index == 51:
-                    return 'Ten pionek jest już w domu'
-                else:
-                    return 0
-            elif col == 'yellow':
-                if index < 30 and new_index > 29: #ma wejść do domu
-                    moveh = new_index - 29 #o ile się ruszyć w domu
-                    if moveh < 5:
-                        moveh = moveh -1
-                        next_index = self.move_inhouse([52, 55], moveh, 52)  # index po ruchu
-                        return self.check_ingohome(next_index, fields, pos, posplace)
-                    else:
-                        return 'Nie możesz wykonać tego ruchu'
-                elif index in range(52,55): #jest już w domu
-                    print('wchodze w elif')
-                    next_index = self.move_inhouse([52,55], cube, index) #index po ruchu
-                    return self.check_ingohome(next_index, fields, pos, posplace)
-                elif index == 55:
-                    return 'Ten pionek jest już w domu'
-                else:
-                    return 0
-            elif col == 'green':
-                if index < 40 and new_index > 39: #ma wejść do domu
-                    moveh = new_index - 39 #o ile się ruszyć w domu
-                    if moveh < 5:
-                        moveh = moveh -1
-                        next_index = self.move_inhouse([40,43], moveh, 40)  # index po ruchu
-                        return self.check_ingohome(next_index, fields, pos, posplace)
-                    else:
-                        return 'Nie możesz wykonać tego ruchu'
-                elif index in range(40,43): #jest już w domu
-                    print('wchodze w elif')
-                    next_index = self.move_inhouse([40,43], cube, index) #index po ruchu
-                    return self.check_ingohome(next_index, fields, pos, posplace)
-                elif index == 43:
-                    return 'Ten pionek jest już w domu'
-                else:
-                    return 0
-        else:
-            return 0
-
-#elif w gohome
-
-#sprawdzenie w funkcji gohome
-    def check_ingohome(self, next_index, fields, pos, posplace):
-        if type(next_index) != str:
-            new = fields[next_index] #współrzędne po ruchu
-            if new in pos:
-                return 'Nie możesz wykonać tego ruchu'
-            else:
-                pos[posplace] = new
-                return pos
-        else:
-            return next_index
-
-#ruch do przodu + bicie
+#ruch do przodu i bicie
     def forwards(self, new, rpos, bpos, ypos, gpos, col, field, cube): #field - współrzędne przed ruchem
         trap = ([6,4],[4,6])
         untouch = ([4,4],[6,6])
@@ -410,6 +243,174 @@ class pawn(board):
 
         return moveresult
 
+#bicie do tyłu
+    def backwards(self, new, rpos, bpos, ypos, gpos, col, field):
+        if new in rpos: #bicie przez kolejne 4 elify
+            if col == 'red':
+                moveresult = 'Nie możesz wykonać tego ruchu!' #nie może zbić swojego pionka
+            else:
+                iwilldie = rpos.index(new) #z pozycji numer pozycji
+                base = self.set_red()
+                for x in base:
+                    if x not in rpos:
+                       gotit = x #wolne pole w bazie
+                rpos[iwilldie] = gotit
+                moveresult = 1
+        elif new in bpos:
+            if col == 'blue':
+                moveresult = 'Nie możesz wykonać tego ruchu!'
+            else:
+                iwilldie = bpos.index(new) #z pozycji numer pozycji
+                base = self.set_blue()
+                for x in base:
+                    if x not in bpos:
+                       gotit = x #wolne pole w bazie
+                bpos[iwilldie] = gotit
+                moveresult = 1
+        elif new in ypos:
+            if col == 'yellow':
+                moveresult = 'Nie możesz wykonać tego ruchu!'
+            else:
+                iwilldie = ypos.index(new) #z pozycji numer pozycji
+                base = self.set_yellow()
+                for x in base:
+                    if x not in ypos:
+                       gotit = x #wolne pole w bazie
+                ypos[iwilldie] = gotit
+                moveresult = 1
+        elif new in gpos:
+            if col == 'green':
+                moveresult = 'Nie możesz wykonać tego ruchu!'
+            else:
+                iwilldie = gpos.index(new) #z pozycji numer pozycji
+                base = self.set_green()
+                for x in base:
+                    if x not in gpos:
+                       gotit = x #wolne pole w bazie
+                gpos[iwilldie] = gotit
+                moveresult = 1
+        else:
+            moveresult = 'Nie możesz wykonać tego ruchu!'
+
+        return moveresult
+
+#ruch w domu
+    def move_inhouse(self, homelist, cube, field): #pole przed ruchem jest w domu | field to index
+        if field + cube < (homelist[1]+1): #ruch jak nie wychodzi poza dom
+            field = field + cube #index po ruchu
+            return field
+        else:
+            return 'Nie możesz wykonać tego ruchu!'
+
+#wybierz pozycje przypisane do koloru
+    def tellmepos(self, col, rpos, bpos, ypos, gpos):
+        if col == 'red':
+            return rpos
+        elif col == 'blue':
+            return bpos
+        elif col == 'yellow':
+            return ypos
+        else:
+            return gpos
+
+#bicie do tyłu
+
+#wejście do domu
+    def gohome(self, field_before, cube, col, pos):
+        fields = self.makelist() #lista wszystkich pól
+        if field_before in fields:
+            index = fields.index(field_before) #indeks pola na którym stoi pionek przed ruchem
+            posplace = pos.index(field_before) #index tegoż pola w liście pos
+            new_index = index + cube
+            if col == 'red':
+                if index < 10 and new_index > 9: #ma wejść do domu
+                    moveh = new_index - 9 #o ile się ruszyć w domu
+                    if moveh < 5:
+                        moveh = moveh -1
+                        next_index = self.move_inhouse([44, 47], moveh, 44)  # index po ruchu
+                        return self.check_ingohome(next_index, fields, pos, posplace)
+                    else:
+                        return 'Nie możesz wykonać tego ruchu!'
+                elif index in range(44,47): #jest już w domu
+                    print('wchodze w elif')
+                    next_index = self.move_inhouse([44,47], cube, index) #index po ruchu
+                    return self.check_ingohome(next_index, fields, pos, posplace)
+                elif index == 47:
+                    return 'Ten pionek jest już w domu'
+                else:
+                    return 0
+            elif col == 'blue':
+                if index < 20 and new_index > 19: #ma wejść do domu
+                    moveh = new_index - 19 #o ile się ruszyć w domu
+                    if moveh < 5:
+                        moveh = moveh -1
+                        next_index = self.move_inhouse([48, 51], moveh, 48)  # index po ruchu
+                        return self.check_ingohome(next_index, fields, pos, posplace)
+                    else:
+                        return 'Nie możesz wykonać tego ruchu!'
+                elif index in range(48,51): #jest już w domu
+                    print('wchodze w elif')
+                    next_index = self.move_inhouse([48,51], cube, index) #index po ruchu
+                    return self.check_ingohome(next_index, fields, pos, posplace)
+                elif index == 51:
+                    return 'Ten pionek jest już w domu'
+                else:
+                    return 0
+            elif col == 'yellow':
+                if index < 30 and new_index > 29: #ma wejść do domu
+                    moveh = new_index - 29 #o ile się ruszyć w domu
+                    if moveh < 5:
+                        moveh = moveh -1
+                        next_index = self.move_inhouse([52, 55], moveh, 52)  # index po ruchu
+                        return self.check_ingohome(next_index, fields, pos, posplace)
+                    else:
+                        return 'Nie możesz wykonać tego ruchu!'
+                elif index in range(52,55): #jest już w domu
+                    print('wchodze w elif')
+                    next_index = self.move_inhouse([52,55], cube, index) #index po ruchu
+                    return self.check_ingohome(next_index, fields, pos, posplace)
+                elif index == 55:
+                    return 'Ten pionek jest już w domu'
+                else:
+                    return 0
+            elif col == 'green':
+                if index < 40 and new_index > 39: #ma wejść do domu
+                    moveh = new_index - 39 #o ile się ruszyć w domu
+                    if moveh < 5:
+                        moveh = moveh -1
+                        next_index = self.move_inhouse([40,43], moveh, 40)  # index po ruchu
+                        return self.check_ingohome(next_index, fields, pos, posplace)
+                    else:
+                        return 'Nie możesz wykonać tego ruchu!'
+                elif index in range(40,43): #jest już w domu
+                    print('wchodze w elif')
+                    next_index = self.move_inhouse([40,43], cube, index) #index po ruchu
+                    return self.check_ingohome(next_index, fields, pos, posplace)
+                elif index == 43:
+                    return 'Ten pionek jest już w domu'
+                else:
+                    return 0
+        else:
+            return 0
+
+#elif w gohome
+
+#sprawdzenie w funkcji gohome
+
+#kod z gohome który się powtarza
+    def check_ingohome(self, next_index, fields, pos, posplace):
+        if type(next_index) != str:
+            new = fields[next_index] #współrzędne po ruchu
+            if new in pos:
+                return 'Nie możesz wykonać tego ruchu!'
+            else:
+                pos[posplace] = new
+                return pos
+        else:
+            return next_index
+
+#ruch do przodu + bicie
+
 #zbicie na polu trap
     def trap(self, new, col, rpos, bpos, ypos, gpos):
         if col == 'red':
@@ -418,7 +419,7 @@ class pawn(board):
             for x in base:
                 if x not in rpos:
                     gotit = x  # wolne pole w bazie
-                rpos[iwilldie] = gotit
+            rpos[iwilldie] = gotit
         elif col == 'blue':
             iwilldie = bpos.index(new)  # z pozycji numer pozycji
             base = self.set_blue()
@@ -445,8 +446,6 @@ class pawn(board):
 
 #sprawdź ruch do przodu - komputer
 
-#niech się ogarnie jak nie wybierze pionka do ruchu
-
 #porównuje listy
     def compare(self, list1, list2):
         l = 0
@@ -457,6 +456,16 @@ class pawn(board):
             return 1
         else:
             return 0
+
+#czy zmienić formularz
+
+#zmiana wyświetlanego formularza
+    def changeclass(self, result):
+        if result in ('Na tym polu już stoi twój pionek', 'Nie możesz wykonać tego ruchu!'):
+            return 0
+        else:
+            return 1
+
 
 b = board()
 fields = b.makelist()
@@ -486,7 +495,6 @@ positions.append(ypos)
 positions.append(gpos)
 positions.append('red') #kolor zaczynający tu
 positions.append(0)
-positions.append(0)
 positions.append(0) #counter
 
 marshal.dump(positions, open("data.marshal", "wb"))
@@ -513,8 +521,7 @@ def draw_board():
     gpos = p[3]
     col = p[4]
     cube = p[5]
-    changeclass=p[6]
-    counter = p[7]
+    counter = p[6]
     turn = col
 
 
@@ -525,38 +532,71 @@ def draw_board():
             rpos = rpawn.check_move(cube, rpos, red, rpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
             whatisay = rpos[4]
             rpos.pop()
-            col = 'blue'
+            changeclass = rpawn.changeclass(whatisay)
+            if changeclass == 1:
+                col = 'blue'
         elif col == 'blue':
             bpos = bpawn.check_move(cube, bpos, blue, bpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
             whatisay = bpos[4]
             bpos.pop()
-            col = 'yellow'
+            changeclass = rpawn.changeclass(whatisay)
+            if changeclass == 1:
+                col = 'yellow'
         elif col == 'yellow':
             ypos = ypawn.check_move(cube, ypos, yellow, ypos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
             whatisay = ypos[4]
             ypos.pop()
-            col = 'green'
+            changeclass = rpawn.changeclass(whatisay)
+            if changeclass == 1:
+                col = 'green'
         else:
             gpos = bpawn.check_move(cube, gpos, green, gpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
             whatisay = gpos[4]
             gpos.pop()
-            col = 'red'
+            changeclass = rpawn.changeclass(whatisay)
+            if changeclass == 1:
+                col = 'red'
+        print(whatisay, changeclass)
+
     else:
         cube = b.cube()
-
-
-
-#zamiana - możliwy rzut albo ruch - to coś nie działa
-    if counter == 0:
-        if changeclass == 1: changeclass = 0
-        else: changeclass = 1
-    elif counter == 3:
-        counter = 0
-
+        if cube < 6:
+            if col == 'red' and rpawn.compare(rpos, red) == 1:
+                changeclass = 1
+                if counter<2:
+                    counter=counter+1
+                else:
+                    counter = 0
+                    col = 'blue'
+            elif col == 'blue' and bpawn.compare(bpos, blue) == 1:
+                changeclass = 1
+                if counter<2:
+                    counter=counter+1
+                else:
+                    counter = 0
+                    col = 'yellow'
+            elif col == 'yellow' and ypawn.compare(ypos, yellow) == 1:
+                changeclass = 1
+                if counter<2:
+                    counter=counter+1
+                else:
+                    counter = 0
+                    col = 'green'
+            elif col == 'green' and gpawn.compare(gpos, green) == 1:
+                changeclass = 1
+                if counter<2:
+                    counter=counter+1
+                else:
+                    counter = 0
+                    col = 'red'
+            else:
+                changeclass = 0
+        else:
+            changeclass = 0
 
 
     positions = []
-    positions.extend([rpos, bpos, ypos, gpos, col, cube, changeclass, counter])
+    positions.extend([rpos, bpos, ypos, gpos, col, cube, counter])
 
     marshal.dump(positions, open("data.marshal", "wb"))
     return render_template('board.html', field=fields, cube=cube, rpos=rpos, gpos=gpos, ypos=ypos, bpos=bpos, turn = turn,
