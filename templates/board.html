@@ -9,22 +9,26 @@
 {% set g = [0] %}
 {% set y = [0] %}
 {% set b = [0] %}
+{% set red = [[9, 9], [9, 10], [10, 9], [10, 10],[6,10], [5, 9], [5, 8], [5, 7], [5, 6]] %}
+{% set blue = [[9, 0], [9, 1], [10, 0], [10, 1],[10,4], [9, 5], [8, 5], [7, 5], [6, 5]] %}
+{% set yellow = [[4,0],[0, 0], [0, 1], [1, 0], [1, 1], [5, 1], [5, 2], [5, 3], [5, 4]] %}
+{% set green = [[0, 9], [0, 10], [1, 9], [1, 10],[0,6], [1, 5], [2, 5], [3, 5], [4, 5]] %}
+
         {% for j in range(0, 11) %}
         <tr>
             {% for i in range(0, 11) %}
                 {% set id = [j,loop.index0] %}
-                {#  <input type="button" >#}
 
-                {% if id in [[9, 0], [9, 1], [10, 0], [10, 1],[10,4], [9, 5], [8, 5], [7, 5], [6, 5]] %}
+                {% if id in blue %}
                     <td class="blue">
 
-                {% elif id in [[9, 9], [9, 10], [10, 9], [10, 10],[6,10], [5, 9], [5, 8], [5, 7], [5, 6]] %}
+                {% elif id in red %}
                     <td class="red">
 
-                {% elif id in [[0, 9], [0, 10], [1, 9], [1, 10],[0,6], [1, 5], [2, 5], [3, 5], [4, 5]] %}
+                {% elif id in green %}
                     <td class="green">
 
-                {% elif id in [[4,0],[0, 0], [0, 1], [1, 0], [1, 1], [5, 1], [5, 2], [5, 3], [5, 4]] %}
+                {% elif id in yellow %}
                     <td class="yellow">
 
                 {% elif id in [[4,6],[6,4]] %}
@@ -40,35 +44,63 @@
                     <td class="norm">
                 {% endif %}
 
-
                 {% for i in rpos %}
                     {% if i == id %}
-                         {{ 'R' }}
-                        {{ loop.index0 }}
+                        {% if i in red %}
+                            <div class="nochangeontheboard">
+                            {{ 'R' }}
+                            {{ loop.index0 }}
+                        {% else %}
+                            <div class="rpos">
+                            {{ 'R' }}
+                            {{ loop.index0 }}
+                            </div>
+                            {% endif %}
                     {% endif %}
                 {% endfor %}
 
                 {% for i in gpos %}
                     {% if i == id %}
-                         {{ 'G' }}
-
-                        {{ loop.index0 }}
+                        {% if i in green %}
+                            <div class="nochangeontheboard">
+                            {{ 'G' }}
+                            {{ loop.index0 }}
+                        {% else %}
+                            <div class="gpos">
+                            {{ 'G' }}
+                            {{ loop.index0 }}
+                            </div>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
 
                 {% for i in ypos %}
                     {% if i == id %}
-                         {{ 'Y' }}
-
-                        {{ loop.index0 }}
+                        {% if i in yellow %}
+                            <div class="nochangeontheboard">
+                            {{ 'Y' }}
+                            {{ loop.index0 }}
+                        {% else %}
+                            <div class="ypos">
+                            {{ 'Y' }}
+                            {{ loop.index0 }}
+                            </div>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
 
                 {% for i in bpos %}
                     {% if i == id %}
-                         {{ 'B' }}
-
-                        {{ loop.index0 }}
+                        {% if id in blue %}
+                            <div class="nochangeontheboard">
+                            {{ 'B' }}
+                            {{ loop.index0 }}
+                        {% else %}
+                            <div class="bpos">
+                            {{ 'B' }}
+                            {{ loop.index0 }}
+                            </div>
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
 

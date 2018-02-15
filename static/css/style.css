@@ -73,7 +73,7 @@ td.yellow{
 }
 
 td.red{
-    background-color: #FF0000;
+    background-color: #FF0202;
     border: solid;
     border-width: 2px;
     width: 60px;
@@ -149,4 +149,24 @@ td.untouch{
     text-align: center;
     padding-top: 10px;
 
+}
+
+.rpos {
+    color: red;
+}
+
+.gpos {
+    color: green;
+}
+
+.ypos {
+    color: yellow;
+}
+
+.bpos {
+    color: blue;
+}
+
+.nochangeontheboard{
+    color: black;
 }

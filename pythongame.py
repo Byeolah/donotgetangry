@@ -120,7 +120,7 @@ class pawn(board):
     }[col]
 
 #sprawdzenie ruchu u człowieka
-    def check_move(self, cube, pawnlist, homelist, field, pawn_number, col, dealer, pos1, pos2, pos3, pos4): #field - stara pozycja
+    def check_move(self, cube, pawnlist, homelist, field, pawn_number, col, dealer, pos1, pos2, pos3, pos4): #field - stara pozycja []
         if field in homelist: #wychodzi z bazy
             if cube == 6:
                 x = self.whoiam(col)
@@ -245,7 +245,12 @@ class pawn(board):
 
 #bicie do tyłu
     def backwards(self, new, rpos, bpos, ypos, gpos, col, field):
-        if new in rpos: #bicie przez kolejne 4 elify
+        makelist = self.makelist()
+        newindex = makelist.index(new) #index po ruchu
+        oldindex = makelist.index(field) #index przed ruchem
+        if (col == 'red' and oldindex >9 and newindex<10) or (col == 'blue' and oldindex >19 and newindex<20) or (col == 'yellow' and oldindex >29 and newindex<30) or (col == 'green' and oldindex >=0 and newindex<40):
+            moveresult = 'Nie możesz wykonać tego ruchu!'
+        elif new in rpos: #bicie przez kolejne 4 elify
             if col == 'red':
                 moveresult = 'Nie możesz wykonać tego ruchu!' #nie może zbić swojego pionka
             else:
@@ -312,8 +317,6 @@ class pawn(board):
             return ypos
         else:
             return gpos
-
-#bicie do tyłu
 
 #wejście do domu
     def gohome(self, field_before, cube, col, pos):
@@ -409,8 +412,6 @@ class pawn(board):
         else:
             return next_index
 
-#ruch do przodu + bicie
-
 #zbicie na polu trap
     def trap(self, new, col, rpos, bpos, ypos, gpos):
         if col == 'red':
@@ -457,6 +458,16 @@ class pawn(board):
         else:
             return 0
 
+#ile wspólnych pól w listach
+    def commonfields(self, list1, list2):
+        l = 0
+        fieldlist = []
+        for x in list1:
+            if x in list2:
+                l+=1
+                fieldlist.append(x)
+        return l, fieldlist
+
 #czy zmienić formularz
 
 #zmiana wyświetlanego formularza
@@ -465,6 +476,41 @@ class pawn(board):
             return 0
         else:
             return 1
+
+#czy może się ruszyć
+    def canyoumove(self, pos, base, home, cube):
+        makefields = self.makelist()
+        countinbase = self.commonfields(pos, base)#ile pionków jest w bazie
+        countinhome = self.commonfields(pos, home)#ile pionków jest w domu
+        print(cube)
+        if countinbase[0] != 4: #jeśli nie wszystkie pionki są w bazie
+            if countinbase[0]+countinhome[0] == 4: #ale jeśli wszystkie pionki są w bazie lub domu
+                if cube == 6:
+                    return 1
+                elif cube == 4 or cube == 5:
+                    return 0
+                elif countinhome[0] ==1:
+                    if countinhome[1][0] == home[3]:
+                        return 0
+                    else:
+                        move = self.move_inhouse([makefields.index(home[0]),makefields.index(home[3])], cube, makefields.index(countinhome[1][0]))
+                        if type(move) == str:
+                            return 0
+                        else:
+                            return 1
+                else:
+                    for i in countinhome[1]:
+                        move = self.move_inhouse([makefields.index(home[0]),makefields.index(home[3])], cube, makefields.index(i))
+                        if type(move) == list:
+                            break
+                    if type(move) == list:
+                        return 1
+                    else:
+                        return 0
+            else: #pionki hasają po polach
+                return 1
+        else: #wszystkie pionki są w bazie
+            return 1 #1-idzie normalna funkcja napisana wcześniej, 0- stata kolejki
 
 
 b = board()
@@ -503,6 +549,9 @@ marshal.dump(positions, open("data.marshal", "wb"))
 def start():
     return render_template('start.html')
 
+@app.route('/losuj', methods=['GET', 'POST'])
+def losuj():
+    return render_template('losuj.html')
 
 @app.route('/game', methods=['GET', 'POST'])
 def draw_board():
@@ -529,33 +578,50 @@ def draw_board():
         pawn_number = int(request.form['pawnnum'])
         dealer = str(request.form['dir'])
         if col == 'red':
-            rpos = rpawn.check_move(cube, rpos, red, rpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
-            whatisay = rpos[4]
-            rpos.pop()
-            changeclass = rpawn.changeclass(whatisay)
-            if changeclass == 1:
+            #canyoumove, if 1 leci to co jest, else sama zmiana koloru
+            if rpawn.canyoumove(rpos,red,redh, cube) == 1:
+                rpos = rpawn.check_move(cube, rpos, red, rpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
+                whatisay = rpos[4]
+                rpos.pop()
+                changeclass = rpawn.changeclass(whatisay)
+                if changeclass == 1:
+                    col = 'blue'
+            else:
                 col = 'blue'
+                changeclass = 1
         elif col == 'blue':
-            bpos = bpawn.check_move(cube, bpos, blue, bpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
-            whatisay = bpos[4]
-            bpos.pop()
-            changeclass = rpawn.changeclass(whatisay)
-            if changeclass == 1:
+            if bpawn.canyoumove(bpos, blue, blueh, cube) == 1:
+                bpos = bpawn.check_move(cube, bpos, blue, bpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
+                whatisay = bpos[4]
+                bpos.pop()
+                changeclass = rpawn.changeclass(whatisay)
+                if changeclass == 1:
+                    col = 'yellow'
+            else:
                 col = 'yellow'
+                changeclass = 1
         elif col == 'yellow':
-            ypos = ypawn.check_move(cube, ypos, yellow, ypos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
-            whatisay = ypos[4]
-            ypos.pop()
-            changeclass = rpawn.changeclass(whatisay)
-            if changeclass == 1:
+            if ypawn.canyoumove(ypos, yellow, yellowh, cube) == 1:
+                ypos = ypawn.check_move(cube, ypos, yellow, ypos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
+                whatisay = ypos[4]
+                ypos.pop()
+                changeclass = rpawn.changeclass(whatisay)
+                if changeclass == 1:
+                    col = 'green'
+            else:
                 col = 'green'
+                changeclass = 1
         else:
-            gpos = bpawn.check_move(cube, gpos, green, gpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
-            whatisay = gpos[4]
-            gpos.pop()
-            changeclass = rpawn.changeclass(whatisay)
-            if changeclass == 1:
+            if gpawn.canyoumove(gpos, green, greenh, cube) == 1:
+                gpos = bpawn.check_move(cube, gpos, green, gpos[pawn_number], pawn_number, col, dealer, rpos, bpos, ypos, gpos)
+                whatisay = gpos[4]
+                gpos.pop()
+                changeclass = rpawn.changeclass(whatisay)
+                if changeclass == 1:
+                    col = 'red'
+            else:
                 col = 'red'
+                changeclass = 1
         print(whatisay, changeclass)
 
     else:
