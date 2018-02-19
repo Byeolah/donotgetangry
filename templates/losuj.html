@@ -2,4 +2,15 @@
 {% block title %}Kto zaczyna?{% endblock %}
 {% block content %}
 
+    <div class="cube">
+            {{ 'Rzut kostką' }}<br>
+            <div class="title">
+                {{ cube }}
+             </div>
+            <form action="losuj" method="POST">
+                <input type="hidden" value=0 name="humanplayers">
+                <input type="submit">
+            </form>
+    </div>
+
 {% endblock %}
